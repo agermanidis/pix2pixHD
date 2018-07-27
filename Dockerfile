@@ -2,7 +2,7 @@
 # See: https://github.com/pytorch/pytorch#docker-image
 FROM pytorch
 
-RUN apt-get update && apt-get install -y libgtk2.0-dev
+RUN apt-get update && apt-get install -y libgtk2.0-dev && apt-get install -y nano
 # pix2pix Dependencies
 RUN pip install dominate
 RUN git clone https://github.com/NVIDIA/pix2pixHD

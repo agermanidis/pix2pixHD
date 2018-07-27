@@ -26,9 +26,11 @@ dataset = data_loader.load_data()
 visualizer = Visualizer(opt)
 
 model = create_model(opt)
-label = cv2.imread('./imgs/lateshow_pose.jpg')
+raw_img = cv2.imread('./imgs/lateshow_pose.jpg')
+# img_resize = cv2.resize(raw_img, (512, 1024), interpolation = cv2.INTER_AREA)
 
-params = get_params(opt, [1024, 576])
+label = Image.fromarray(raw_img)
+params = get_params(opt, label.size)
 transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
 label_tensor = transform_label(label) * 255.0
 inst_tensor = transform_label(label)
