@@ -28,7 +28,7 @@ visualizer = Visualizer(opt)
 model = create_model(opt)
 label = cv2.imread('./imgs/lateshow_pose.jpg')
 
-params = get_params(opt, label.size)
+params = get_params(opt, [1024, 576])
 transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
 label_tensor = transform_label(label) * 255.0
 inst_tensor = transform_label(label)
