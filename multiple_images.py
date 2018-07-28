@@ -48,6 +48,7 @@ def main():
     label_tensor = transform_label(raw_img)
     label_tensor = label_tensor.unsqueeze(0)
     # Get fake image
+    print('Generating fake image from', image)
     generated = model.inference(label_tensor, None)
     # Save img
     im = util.tensor2im(generated.data[0])
