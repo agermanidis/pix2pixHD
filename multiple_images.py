@@ -37,6 +37,13 @@ opt.label_nc = 0
 # Load the model
 model = create_model(opt)
 
+# Utils to sort the images
+def atoi(text):
+  return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+  return [ atoi(c) for c in re.split('(\d+)', text) ]
+
 def main():
   print('Running pix2pixHD over all images in %s' % opt.images_dir)
   images = [img for img in os.listdir(opt.images_dir) if img.endswith(".%s" % opt.images_format)]
@@ -57,17 +64,18 @@ def main():
 
   if opt.make_video:
     print('Making video with %s' % opt.output_dir)
-    images = [img for img in os.listdir(opt.output_dir) if img.endswith(".%s" % opt.images_format)]
-    frame = cv2.imread(os.path.join(opt.output_dir, images[0]))
-    height, width, layers = frame.shape
+    filenames = glob.glob(opt.output_dir + '/*.' + opt.images_format)
+    filenames.sort(key=natural_keys)
+    print('Reading Images...')
+    images = [cv2.imread(img) for img in filenames]
+    height, width, layers = images[0].shape
 
     video_path = os.path.join(opt.video_output_dir, opt.video_name + "." + opt.video_format)
     print('Video will be in', video_path, height, width)
     video = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*'DIVX'), opt.fps, (width,height))
 
     for image in images:
-      print('Got image', image)
-      video.write(cv2.imread(os.path.join(opt.output_dir, image)))
+      video.write(image)
 
     video.release()
     print('Done! Video ready.')
