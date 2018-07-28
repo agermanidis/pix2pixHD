@@ -1,3 +1,5 @@
+videos/
+outputs/
 debug*
 checkpoints/
 results/
