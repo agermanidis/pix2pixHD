@@ -52,7 +52,7 @@ def main():
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('-m', '--model', dest='model', default='lateshow', type=str, help='The model to use')
-  parser.add_argument('--images_dir', dest='images_dir', type=str, default='.', help='Path of images to use')
+  parser.add_argument('-imgs_dir', '--images_dir', dest='images_dir', type=str, default='.', help='Path of images to use')
   parser.add_argument('-img_f', '--images_format', dest='images_format', type=str, default='jpg', help='Format of images')
   parser.add_argument('-vid_f', '--video_format', dest='video_format', type=str, default='mp4', help='Format of video')
   parser.add_argument('-o', '--output_dir', dest='output_dir', type=str, default='./outputs', help='Output directory')
