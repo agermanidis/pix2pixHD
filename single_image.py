@@ -20,25 +20,28 @@ opt.nThreads = 1   # test code only supports nThreads = 1
 opt.batchSize = 1  # test code only supports batchSize = 1
 opt.serial_batches = True  # no shuffle
 opt.no_flip = True  # no flip
-
-data_loader = CreateDataLoader(opt)
-dataset = data_loader.load_data()
-visualizer = Visualizer(opt)
-
+opt.name = 'lateshow'
+opt.netG = 'local'
+opt.ngf = 32
+opt.resize_or_crop = 'resize_and_crop'
+opt.label_feat = False
 model = create_model(opt)
-raw_img = cv2.imread('./imgs/lateshow_pose.jpg')
+
+
+raw_img = cv2.imread('imgs/lateshow_pose.jpg')
 # img_resize = cv2.resize(raw_img, (512, 1024), interpolation = cv2.INTER_AREA)
 
 label = Image.fromarray(raw_img)
-params = get_params(opt, label.size)
+params = get_params(opt, (1024, 512))
 transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
-label_tensor = transform_label(label) * 255.0
-inst_tensor = transform_label(label)
+label_tensor = transform_label(label)
+#inst_tensor = transform_label(label)
 label_tensor = label_tensor.unsqueeze(0)
-inst_tensor = inst_tensor.unsqueeze(0)
-generated = model.inference(label_tensor, inst_tensor)
-im = util.tensor2im(generated.data[0])
-im_pil = Image.fromarray(im)
-buffer = io.BytesIO()
-im_pil.save(buffer, format='JPEG')
-cv2.imwrite('./outputs/test.jpg', im_pil)
+#inst_tensor = inst_tensor.unsqueeze(0)
+#generated = model.inference(label_tensor, label_tensor)
+genereated = model.netG.forward(label_tensor)
+#im = util.tensor2im(generated.data[0])
+#im_pil = Image.fromarray(im)
+#buffer = io.BytesIO()
+#im_pil.save(buffer, format='JPEG')
+#cv2.imwrite('./outputs/test.jpg', im_pil)
