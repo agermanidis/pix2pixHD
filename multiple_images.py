@@ -1,6 +1,7 @@
 # Run inference over a multiple image
 # =================
 import os
+import glob
 from PIL import Image
 import argparse
 import cv2
