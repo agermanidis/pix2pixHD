@@ -4,17 +4,11 @@ import os
 from PIL import Image
 import argparse
 import cv2
-from collections import OrderedDict
-from torch.autograd import Variable
 from options.test_options import TestOptions
-from data.data_loader import CreateDataLoader
 from models.models import create_model
 import util.util as util
-from util.visualizer import Visualizer
-from util import html
 import torch
 from data.base_dataset import get_params, get_transform
-from torchvision import models, transforms
 
 # Model Options that match the training
 opt = TestOptions().parse(save=False)
@@ -30,7 +24,6 @@ opt.label_nc = 0
 
 # Load the model
 model = create_model(opt)
-
 
 def main():
   print('Running pix2pixHD over all images in %s' % args.images_dir)
