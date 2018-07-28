@@ -1,15 +1,6 @@
 # Run inference over a multiple image
 # =================
 import os
-import json
-import base64
-import common
-import io
-import numpy as np
-from PIL import Image
-from flask import Flask, jsonify
-from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 import glob
 from PIL import Image
 import argparse
