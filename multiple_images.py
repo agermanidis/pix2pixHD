@@ -11,7 +11,7 @@ import torch
 from data.base_dataset import get_params, get_transform
 
 # Model Options that match the training
-opt = TestOptions().parse(save=False)
+opt = CustomOptions().parse(save=False)
 opt.nThreads = 1
 opt.batchSize = 1
 opt.serial_batches = True
@@ -42,14 +42,15 @@ def main():
     im_pil = Image.fromarray(im)
     im_pil.save(os.path.join(args.output_dir, image))
 
-if __name__ == '__main__':
-  parser2 = argparse.ArgumentParser()
-  parser2.add_argument('-m', '--model', dest='model', default='lateshow', type=str, help='The model to use')
-  parser2.add_argument('-imgs_dir', '--images_dir', dest='images_dir', type=str, default='.', help='Path of images to use')
-  parser2.add_argument('-img_f', '--images_format', dest='images_format', type=str, default='jpg', help='Format of images')
-  parser2.add_argument('-vid_f', '--video_format', dest='video_format', type=str, default='mp4', help='Format of video')
-  parser2.add_argument('-o', '--output_dir', dest='output_dir', type=str, default='./outputs', help='Output directory')
-  args = parser2.parse_args()
+class CustomOptions(TestOptions):
+  def initialize(self):
+    TestOptions.initialize(self)
+    self.parser.add_argument('-m', '--model', dest='model', default='lateshow', type=str, help='The model to use')
+    self.parser.add_argument('-imgs_dir', '--images_dir', dest='images_dir', type=str, default='.', help='Path of images to use')
+    self.parser.add_argument('-img_f', '--images_format', dest='images_format', type=str, default='jpg', help='Format of images')
+    self.parser.add_argument('-vid_f', '--video_format', dest='video_format', type=str, default='mp4', help='Format of video')
+    self.parser.add_argument('-o', '--output_dir', dest='output_dir', type=str, default='./outputs', help='Output directory')
 
+if __name__ == '__main__':
   main()
 
