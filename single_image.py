@@ -32,7 +32,7 @@ opt.label_nc = 0
 # Load the model
 model = create_model(opt)
 
-# Load a hard code an image, just to test
+# Load a hard code image, just to test
 raw_img = Image.open("imgs/lateshow_pose.jpg")
 
 # Prepare image
