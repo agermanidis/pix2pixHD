@@ -1,9 +1,8 @@
-# Run inference over one image
-# ==============
-
+# Run inference over a single image
+# =================
 import os
-import cv2
 from PIL import Image
+import cv2
 from collections import OrderedDict
 from torch.autograd import Variable
 from options.test_options import TestOptions
@@ -12,36 +11,41 @@ from models.models import create_model
 import util.util as util
 from util.visualizer import Visualizer
 from util import html
-from data.base_dataset import get_params, get_transform
 import torch
+from data.base_dataset import get_params, get_transform
+from torchvision import models, transforms
 
+# Model Options that match the training
 opt = TestOptions().parse(save=False)
-opt.nThreads = 1   # test code only supports nThreads = 1
-opt.batchSize = 1  # test code only supports batchSize = 1
-opt.serial_batches = True  # no shuffle
-opt.no_flip = True  # no flip
+opt.nThreads = 1
+opt.batchSize = 1
+opt.serial_batches = True
+opt.no_flip = True
 opt.name = 'lateshow'
-opt.netG = 'local'
-opt.ngf = 32
-opt.resize_or_crop = 'resize_and_crop'
-opt.label_feat = False
+#opt.netG = 'local'
+#opt.ngf = 32
+opt.resize_or_crop = 'none'
+opt.use_features = False
+opt.no_instance = True
+opt.label_nc = 0
+
+# Load the model
 model = create_model(opt)
 
+# Load a hard code an image, just to test
+raw_img = Image.open("imgs/lateshow_pose.jpg")
 
-raw_img = cv2.imread('imgs/lateshow_pose.jpg')
-# img_resize = cv2.resize(raw_img, (512, 1024), interpolation = cv2.INTER_AREA)
-
-label = Image.fromarray(raw_img)
-params = get_params(opt, (1024, 512))
+# Prepare image
+params = get_params(opt, raw_img.size)
 transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
-label_tensor = transform_label(label)
-#inst_tensor = transform_label(label)
+label_tensor = transform_label(raw_img)
 label_tensor = label_tensor.unsqueeze(0)
-#inst_tensor = inst_tensor.unsqueeze(0)
-#generated = model.inference(label_tensor, label_tensor)
-genereated = model.netG.forward(label_tensor)
-#im = util.tensor2im(generated.data[0])
-#im_pil = Image.fromarray(im)
-#buffer = io.BytesIO()
-#im_pil.save(buffer, format='JPEG')
-#cv2.imwrite('./outputs/test.jpg', im_pil)
+
+# Get fake image
+generated = model.inference(label_tensor, None)
+
+# Save img
+im = util.tensor2im(generated.data[0])
+im_pil = Image.fromarray(im)
+im_pil.save('outputs/test.jpg')
+
