@@ -10,7 +10,7 @@ import numpy as np
 import gevent.monkey
 gevent.monkey.patch_all()
 from PIL import Image
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import cv2
@@ -69,51 +69,35 @@ def main(input_img):
   #im_pil.save(buffer, format='JPEG')
   #return base64.b64encode(raw_img)
 
-  raw = cv2.imread("imgs/lateshow/lateshow_pose.jpg")
-  retval, buffer = cv2.imencode('.jpg', raw)
-  jpg_as_text = base64.b64encode(buffer)
-  return jpg_as_text
+  #raw = cv2.imread("imgs/lateshow/lateshow_pose.jpg")
+  #retval, buffer = cv2.imencode('.jpg', raw)
+  #jpg_as_text = base64.b64encode(buffer)
+  #print('got img from main')
+  #return jpg_as_text
 
-  #image = stringToImage(input_img[input_img.find(",")+1:])
-  #img = toRGB(image)
-  #params = get_params(opt, image.size)
-  #transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
-  #label_tensor = transform_label(image)
-  #label_tensor = label_tensor.unsqueeze(0)
-  #generated = model.inference(label_tensor, None)
-  #im = util.tensor2im(generated.data[0])
-  #retval, buffer = cv2.imencode('.jpg', im)
-  #return base64.b64encode(buffer)
+  image = stringToImage(input_img[input_img.find(",")+1:])
+  img = toRGB(image)
+  params = get_params(opt, image.size)
+  transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
+  label_tensor = transform_label(image)
+  label_tensor = label_tensor.unsqueeze(0)
+  generated = model.inference(label_tensor, None)
+  im = util.tensor2im(generated.data[0])
+  retval, buffer = cv2.imencode('.jpg', im)
+  return base64.b64encode(buffer)
 
 # --- 
 # Server Routes
 # --- 
-# Base route, functions a simple testing 
 @app.route('/')
 def index():
-  return jsonify(status="200", message='pix2pixHD is running', query_route='/query', test_route='/test')
+  return jsonify(status="200", message='pix2pixHD is running')
 
-# Test the model with a fix to see if it's working
-@app.route('/test')
-def query():
-  results = main(None)
-  return jsonify(status="200", model='pix2pixHD', response=results)
-
-# When a client socket connects
-@socketio.on('connect', namespace='/query')
-def new_connection():
-  emit('successful_connection', {"data": "connection established"})
-
-# When a client socket disconnects
-@socketio.on('disconnect', namespace='/query')
-def disconnect():
-  print('Client Disconnect')
-
-# When a client sends data. This should call the main() function
-@socketio.on('update_request', namespace='/query')
-def new_request(request):
-  results = main(request["data"])
-  emit('update_response', {"results": results})
+@app.route('/infer', methods=['POST'])
+def infer():
+  print('got some data')
+  results = main(request.form['data'])
+  return results
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0', port=PORT, debug=True)
