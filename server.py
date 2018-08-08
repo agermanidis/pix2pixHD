@@ -1,6 +1,7 @@
 # pix2pix server
 # Run inference over a single image
 # =================
+import time
 import os
 import json
 import base64
@@ -19,6 +20,9 @@ from models.models import create_model
 import util.util as util
 import torch
 from data.base_dataset import get_params, get_transform
+from scipy.misc import imresize
+import torch.nn.functional as F
+
 
 # Model Options that match the training
 opt = TestOptions().parse(save=False)
@@ -54,6 +58,7 @@ def toRGB(image):
 
 def main(input_img):
   #raw_img = Image.open("imgs/lateshow/lateshow_pose.jpg")
+  t1 = time.time()
   raw_img = stringToImage(input_img)
   params = get_params(opt, raw_img.size)
   transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
@@ -61,12 +66,14 @@ def main(input_img):
   label_tensor = label_tensor.unsqueeze(0)
   # Get fake image
   generated = model.inference(label_tensor, None)
-
+  torch.cuda.synchronize()
   # Save img
+  print(time.time() - t1)
   im = util.tensor2im(generated.data[0])
   im_pil = Image.fromarray(im)
   buffer = io.BytesIO()
   im_pil.save(buffer, format='JPEG')
+
   return base64.b64encode(buffer.getvalue())
 
   #raw = cv2.imread("imgs/lateshow/lateshow_pose.jpg")
@@ -99,4 +106,4 @@ def infer():
   return results
 
 if __name__ == '__main__':
-  socketio.run(app, host='0.0.0.0', port=PORT, debug=True)
+  socketio.run(app, host='0.0.0.0', port=PORT, debug=False)

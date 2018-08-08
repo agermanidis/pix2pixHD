@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 import numpy as np
 import os
-
+import time
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
 def tensor2im(image_tensor, imtype=np.uint8, normalize=True):
@@ -13,7 +13,9 @@ def tensor2im(image_tensor, imtype=np.uint8, normalize=True):
         for i in range(len(image_tensor)):
             image_numpy.append(tensor2im(image_tensor[i], imtype, normalize))
         return image_numpy
-    image_numpy = image_tensor.cpu().float().numpy()
+    t1 = time.time()
+    image_numpy = image_tensor.float().cpu().numpy()
+    print('transfer to cpu:', time.time() - t1)
     if normalize:
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     else:
