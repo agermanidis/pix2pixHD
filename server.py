@@ -24,22 +24,30 @@ from scipy.misc import imresize
 import torch.nn.functional as F
 
 
-# Model Options that match the training
-opt = TestOptions().parse(save=False)
-opt.nThreads = 1
-opt.batchSize = 1
-opt.serial_batches = True
-opt.no_flip = True
-opt.name = 'lateshow'
-#opt.netG = 'local'
-#opt.ngf = 32
-opt.resize_or_crop = 'none'
-opt.use_features = False
-opt.no_instance = True
-opt.label_nc = 0
+def load_model(name):
+  opt = TestOptions().parse(save=False)
+  opt.nThreads = 1
+  opt.batchSize = 1
+  opt.serial_batches = True
+  opt.no_flip = True
+  opt.name = name
+  opt.resize_or_crop = 'none'
+  opt.use_features = False
+  opt.no_instance = True
+  opt.label_nc = 0
+  return create_model(opt)
+
 
 # Load the model
-model = create_model(opt)
+
+MODELS = {}
+for model_name in os.listdir('checkpoints'):
+  try:
+    MODELS[model_name] = load_model(model_name)
+  except:
+    continue
+
+current_model = 'shinning'
 
 # Server configs
 PORT = 23100
@@ -65,7 +73,7 @@ def main(input_img):
   label_tensor = transform_label(raw_img)
   label_tensor = label_tensor.unsqueeze(0)
   # Get fake image
-  generated = model.inference(label_tensor, None)
+  generated = MODELS[model_name].inference(label_tensor, None)
   torch.cuda.synchronize()
   # Save img
   print(time.time() - t1)
@@ -104,6 +112,23 @@ def index():
 def infer():
   results = main(request.form['data'])
   return results
+
+@app.route('/switch_model', methods=['POST'])
+def switch_model():
+  global current_model
+  current_model = request.json['model']
+#  if request.json['model'] not in os.listdir('checkpoints'):
+#    return abort(404)
+#  load_model(request.json['model'])
+  return jsonify(status="200", current_model=current_model)
+
+@app.route('/list_models')
+def list_models():
+  return jsonify(status="200", models=json.dumps(os.listdir('checkpoints')))
+
+@app.route('/current_model')
+def current_model():
+  return jsonify(status="200", current_model=current_model)
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0', port=PORT, debug=False)
