@@ -23,8 +23,10 @@ from data.base_dataset import get_params, get_transform
 from scipy.misc import imresize
 import torch.nn.functional as F
 
+opt = None
 
 def load_model(name):
+  global opt
   opt = TestOptions().parse(save=False)
   opt.nThreads = 1
   opt.batchSize = 1
@@ -73,7 +75,7 @@ def main(input_img):
   label_tensor = transform_label(raw_img)
   label_tensor = label_tensor.unsqueeze(0)
   # Get fake image
-  generated = MODELS[model_name].inference(label_tensor, None)
+  generated = MODELS[current_model].inference(label_tensor, None)
   torch.cuda.synchronize()
   # Save img
   print(time.time() - t1)
@@ -124,10 +126,10 @@ def switch_model():
 
 @app.route('/list_models')
 def list_models():
-  return jsonify(status="200", models=json.dumps(os.listdir('checkpoints')))
+  return jsonify(status="200", models=os.listdir('checkpoints'))
 
 @app.route('/current_model')
-def current_model():
+def get_current_model():
   return jsonify(status="200", current_model=current_model)
 
 if __name__ == '__main__':
