@@ -39,17 +39,16 @@ def load_model(name):
   opt.label_nc = 0
   return create_model(opt)
 
-
 # Load the model
+#MODELS = {}
+#for model_name in os.listdir('checkpoints'):
+ # try:
+ #   MODELS[model_name] = load_model(model_name)
+ # except:
+ #   continue
 
-MODELS = {}
-for model_name in os.listdir('checkpoints'):
-  try:
-    MODELS[model_name] = load_model(model_name)
-  except:
-    continue
-
-current_model = 'shinning'
+current_model_name = 'shinning'
+current_model = load_model(current_model_name)
 
 # Server configs
 PORT = 23100
@@ -75,7 +74,8 @@ def main(input_img):
   label_tensor = transform_label(raw_img)
   label_tensor = label_tensor.unsqueeze(0)
   # Get fake image
-  generated = MODELS[current_model].inference(label_tensor, None)
+  #generated = MODELS[current_model].inference(label_tensor, None)
+  generated = current_model.inference(label_tensor, None)
   torch.cuda.synchronize()
   # Save img
   print(time.time() - t1)
@@ -118,11 +118,13 @@ def infer():
 @app.route('/switch_model', methods=['POST'])
 def switch_model():
   global current_model
-  current_model = request.json['model']
+  global currnet_model_name
+  current_model_name = request.json['model']
+  current_model = load_model(current_model_name)
 #  if request.json['model'] not in os.listdir('checkpoints'):
 #    return abort(404)
 #  load_model(request.json['model'])
-  return jsonify(status="200", current_model=current_model)
+  return jsonify(status="200", current_model=current_model_name)
 
 @app.route('/list_models')
 def list_models():
@@ -130,7 +132,7 @@ def list_models():
 
 @app.route('/current_model')
 def get_current_model():
-  return jsonify(status="200", current_model=current_model)
+  return jsonify(status="200", current_model=current_model_name)
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0', port=PORT, debug=False)
