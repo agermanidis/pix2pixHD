@@ -23,6 +23,7 @@ class CustomOptions(TestOptions):
    self.parser.add_argument('-v_o', '--video_output_dir', dest='video_output_dir', type=str, default='videos', help='Video output dir')
    self.parser.add_argument('-make_video', '--make_video', dest='make_video', type=bool, default=True, help='Toggle video making')
    self.parser.add_argument('-fps', '--fps', dest='fps', type=int, default=10, help='Frames per second')
+   self.parser.add_argument('-m', '--model', dest='model', type=str, default='shinning', help='Model to use')
 
 # Model Options that match the training
 opt = CustomOptions().parse(save=False)
@@ -30,7 +31,7 @@ opt.nThreads = 1
 opt.batchSize = 1
 opt.serial_batches = True
 opt.no_flip = True
-opt.name = 'shinning'
+opt.name = opt.model
 opt.resize_or_crop = 'none'
 opt.use_features = False
 opt.no_instance = True
